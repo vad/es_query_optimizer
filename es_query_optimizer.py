@@ -62,6 +62,8 @@ class TermsNode(Node):
 
         self.field = keys[0]
         self.values = q[self.field]
+        self._parameters = None
+        self._parameters_hash = None
 
         # terms lookup, don't merge
         # TODO: test
@@ -76,11 +78,11 @@ class TermsNode(Node):
             json.dumps(_parameters).encode("utf-8")
         ).digest()
 
-    def can_be_merged(self, other: "TermsNode") -> bool:
-        return self._parameters == other._parameters
-
     def mergeability_hash(self) -> str:
         return f"{self.field}:{self._parameters_hash}"
+
+    def is_mergeable(self) -> bool:
+        return getattr(self, '_parameters_hash', None) is not None
 
     def query(self) -> dict:
         return {"terms": self._q}
@@ -155,10 +157,9 @@ def _optimize_pass(node: Node) -> Node:
             rewrite = []
 
             for child in bool_clause:
-                if not isinstance(child, TermsNode):
+                if not isinstance(child, TermsNode) or not child.is_mergeable():
                     rewrite.append(child)
                     continue
-
                 groupable_terms[child.mergeability_hash()].append(child)
 
             for _, terms_list in groupable_terms.items():
