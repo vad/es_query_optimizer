@@ -157,14 +157,11 @@ def _optimize_pass(node: Node) -> Node:
             rewrite = []
 
             for child in bool_clause:
-                if not isinstance(child, TermsNode):
+                if not isinstance(child, TermsNode) or not child.is_mergeable():
                     rewrite.append(child)
                     continue
+                groupable_terms[child.mergeability_hash()].append(child)
 
-                if child.is_mergeable():
-                    groupable_terms[child.mergeability_hash()].append(child)
-                else:
-                    rewrite.append(child)
             for _, terms_list in groupable_terms.items():
                 rewrite.append(merge_terms(terms_list))
 
