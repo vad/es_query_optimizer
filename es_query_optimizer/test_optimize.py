@@ -1,4 +1,4 @@
-from es_query_optimizer import optimize
+from .optimizer import optimize
 
 
 def test_bool_filter_filter():
