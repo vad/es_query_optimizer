@@ -151,13 +151,15 @@ def _optimize_pass(node: Node) -> Node:
                 must_out.append(child)
         node.must = must_out
 
+        bool_clauses = {'filter': node.filter, 'must': node.must, 'must_not': node.must_not, 'should': node.should}
+
         # optimize terms
-        for bool_clause in [node.filter, node.must, node.must_not, node.should]:
+        for bool_type, bool_clause in bool_clauses.items():
             groupable_terms = defaultdict(list)
             rewrite = []
 
             for child in bool_clause:
-                if not isinstance(child, TermsNode) or not child.is_mergeable():
+                if bool_type in {'must', 'filter'} or not isinstance(child, TermsNode) or not child.is_mergeable():
                     rewrite.append(child)
                     continue
                 groupable_terms[child.mergeability_hash()].append(child)
@@ -170,7 +172,7 @@ def _optimize_pass(node: Node) -> Node:
             bool_clause.extend(rewrite)
 
         # recurse
-        for bool_clause in [node.filter, node.must, node.must_not, node.should]:
+        for bool_clause in bool_clauses.values():
             rewrite = []
             for child in bool_clause:
                 optimized_child = _optimize_pass(child)
