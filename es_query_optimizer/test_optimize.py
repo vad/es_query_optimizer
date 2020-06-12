@@ -45,6 +45,23 @@ def test_bool_must_not_terms():
     assert opt == {"bool": {"must_not": [{"terms": {"field1": ["01.11", "02.22"]}}]}}
 
 
+def test_filter_terms():
+    q = {
+        'bool': {
+            'filter': [{
+                'bool': {
+                    'must': [
+                        {'terms': {'field': ['A']}},
+                        {'terms': {'field': ['B']}}
+                    ]
+                }
+            }]
+        }
+    }
+    opt = optimize(q)
+    assert opt == {'bool': {'filter': [{'terms': {'field': ['A']}}, {'terms': {'field': ['B']}}]}}
+
+
 def test_terms_with_id():
     q = {"bool": {"filter": [{"bool": {"must": [{"terms": {"_id": {"index": "a", "type": "b", "id": 1}}}]}}]}}
     opt = optimize(q)
