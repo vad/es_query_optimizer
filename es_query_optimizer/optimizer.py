@@ -57,7 +57,7 @@ class TermsNode(Node):
 
         keys = list(copy_q.keys())
         if len(keys) != 1:
-            logger.warning("Cannot identify field for terms query %v", q)
+            logger.warning("Cannot identify field for terms query %s", q)
             return
 
         self.field = keys[0]
