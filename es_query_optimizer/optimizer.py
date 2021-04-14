@@ -112,7 +112,10 @@ class QueryParser:
 
     @classmethod
     def iter_parse(cls, iter_queries) -> List[Node]:
-        return [cls.parse(item) for item in iter_queries]
+        if isinstance(iter_queries, list):
+            return [cls.parse(item) for item in iter_queries]
+        else:
+            return [cls.parse(iter_queries)]
 
 
 def _optimize_pass(node: Node) -> Node:

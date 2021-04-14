@@ -83,3 +83,9 @@ def test_terms_with_id():
     q = {"bool": {"filter": [{"bool": {"must": [{"terms": {"_id": {"index": "a", "type": "b", "id": 1}}}]}}]}}
     opt = optimize(q)
     assert opt == {"bool": {"filter": [{"terms": {"_id": {"index": "a", "type": "b", "id": 1}}}]}}
+
+
+def test_dont_destroy_single_item_bool():
+    q = {"bool": {"must": {'query_string': {'default_operator': 'AND', 'fields': ['f1', 'f2'], 'query': 'some content'}}}}
+    opt = optimize(q)
+    assert opt == {"bool": {"must": [{'query_string': {'default_operator': 'AND', 'fields': ['f1', 'f2'], 'query': 'some content'}}]}}
