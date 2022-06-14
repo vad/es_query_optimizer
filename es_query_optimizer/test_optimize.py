@@ -89,3 +89,37 @@ def test_dont_destroy_single_item_bool():
     q = {"bool": {"must": {'query_string': {'default_operator': 'AND', 'fields': ['f1', 'f2'], 'query': 'some content'}}}}
     opt = optimize(q)
     assert opt == {"bool": {"must": [{'query_string': {'default_operator': 'AND', 'fields': ['f1', 'f2'], 'query': 'some content'}}]}}
+
+
+def test_preserve_named_queries():
+    q = {
+        'bool': {
+            'filter': [{
+                'bool': {
+                    'should': [
+                        {'terms': {'field': ['A'], '_name': 'field_A'}},
+                        {'terms': {'field': ['B'], '_name': 'field_B'}}
+                    ]
+                }
+            }]
+        }
+    }
+    opt = optimize(q)
+    assert opt == q
+
+
+def test_merge_named_queries_with_same_name():
+    q = {
+        'bool': {
+            'filter': [{
+                'bool': {
+                    'should': [
+                        {'terms': {'field': ['A'], '_name': 'field_C'}},
+                        {'terms': {'field': ['B'], '_name': 'field_C'}}
+                    ]
+                }
+            }]
+        }
+    }
+    opt = optimize(q)
+    assert opt == {'bool': {'filter': [{'bool': {'should': [{'terms': {'field': ['A', 'B'], '_name': 'field_C'}}]}}]}}

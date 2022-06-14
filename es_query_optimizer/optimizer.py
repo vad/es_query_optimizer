@@ -55,7 +55,7 @@ class TermsNode(Node):
         copy_q = dict(q)
         self.boost = copy_q.pop("boost", None)
 
-        keys = list(copy_q.keys())
+        keys = list(key for key in copy_q.keys() if key != "_name")
         if len(keys) != 1:
             logger.warning("Cannot identify field for terms query %v", q)
             return
